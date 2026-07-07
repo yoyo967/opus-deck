@@ -41,6 +41,7 @@ Ein **weltklasse, VS-Code-gebrandetes Interface**, das
 | 6 | **Spec-driven / Perfect-Twin** | Wie OPUS PRIME EX: Spec zuerst, Traceability, vier Gates grün vor Merge. |
 | 7 | **Barrierefrei & mehrsprachig** | WCAG 2.2 AA, Tastatur-vollständig, i18n (DE/EN) ab Tag 1. |
 | 8 | **Lokal-fähig** | Läuft als Desktop-App **und** im Browser; Kernfunktionen offline nutzbar (PWA/Electron). |
+| 9 | **A5-konform (BSI-Prüfrahmen)** | Wir bauen **A5-ready**: prüfbare Artefakte zu Qualität, Sicherheit/Datenschutz, Transparenz, Governance. Lebendes Mapping in [`spec/A5_COMPLIANCE.md`](../spec/A5_COMPLIANCE.md), Entscheidung ADR-0006. Ehrlich: Draft-Ausrichtung, keine Zertifizierung. |
 
 ---
 
@@ -216,6 +217,7 @@ größte offene Wette — siehe §13.)
 | **Performance** | Editor-Latenz < 50 ms; Agent-Token-Streaming; Virtualisierung großer Bäume/Logs |
 | **State/Persistence** | Projekt-/Session-/Layout-Persistenz; Wiederaufnahme nach Reload |
 | **Observability** | strukturierte Logs, Traces, Health, SLOs; kein PII in Logs (erbt OPUS-PRIME-Regel) |
+| **A5-Compliance (BSI)** | Alle vier A5-Blöcke gegen konkrete Kontrollen gemappt; Gap-Backlog gepflegt; OSCAL-CI-Lint als Roadmap. SSoT: [`spec/A5_COMPLIANCE.md`](../spec/A5_COMPLIANCE.md) · ADR-0006 |
 
 ---
 

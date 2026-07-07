@@ -30,6 +30,7 @@ P0–P8) und die **[ADRs](docs/adr/)**.
 | [0003](docs/adr/ADR-0003-web-first.md) | **Web zuerst** (Cloud Run EU), Desktop später aus derselben Codebase |
 | [0004](docs/adr/ADR-0004-flow-studio-agent.md) | **OPUS FLOW** — lokaler Desktop-/Dev-Automations-Agent (Gemma 4) als 2. OPUS-DECK-Mieter ([Spec](spec/FLOW_STUDIO.md)) |
 | [0005](docs/adr/ADR-0005-second-brain.md) | **Second Brain** — geteiltes, agentengepflegtes Wissen (Karpathy-LLM-Wiki-Muster) als MCP-Server ([Spec](spec/SECOND_BRAIN.md)) |
+| [0006](docs/adr/ADR-0006-a5-conformity.md) | **A5-Konformität** — BSI-KI-Prüfrahmen als Governance-Linse fürs ganze System ([Mapping](spec/A5_COMPLIANCE.md)) |
 
 ## Repo-Struktur (Ziel)
 
