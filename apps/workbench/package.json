@@ -31,7 +31,8 @@
         "applicationName": "OPUS DECK",
         "preferences": {
           "files.enableTrash": false,
-          "workbench.colorTheme": "dark"
+          "workbench.colorTheme": "dark",
+          "window.title": "OPUS DECK — ${activeEditorShort}${separator}${rootName}"
         }
       }
     }

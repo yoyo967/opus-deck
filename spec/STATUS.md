@@ -17,7 +17,7 @@ Statusleiste 0 Fehler/0 Warnungen, Konsole sauber). Verifiziert **im Linux-Conta
 |----|--------------|--------|
 | 0.1 | Repo + CI-Skelett + Gate-Struktur | ✅ Repo, CI-Skelett, Struktur-Gate |
 | 0.2 | Theia-App bootet (Monaco, Workbench) | ✅ **bewiesen** (Container, HTTP 200, gerendert) |
-| 0.3 | Branding/Theme-Paket (Tokens, Dark/Light, Logo) | ⬜ **nächster Schritt** (Default-Theme läuft, eigenes Token-Paket fehlt) |
+| 0.3 | Branding/Theme-Paket (Tokens, Dark/Light, Logo) | 🟡 **teilweise** — applicationName + Fenstertitel „OPUS DECK" greifen; **volles Farb-Theme fehlt** (siehe unten) |
 | 0.4 | ADR-Prozess + Spec-Ordner | ✅ ADR-0001/0002/0003 + spec/ |
 
 ## WI-0.2 — Ergebnis & ehrliche Einordnung
@@ -33,6 +33,18 @@ Statusleiste 0 Fehler/0 Warnungen, Konsole sauber). Verifiziert **im Linux-Conta
   das Produktions-Target (Linux/Cloud Run). Lokal starten:
   `docker build -t opus-deck-workbench apps/workbench && docker run -p 3333:3333 opus-deck-workbench`
   → http://127.0.0.1:3333
+
+## WI-0.3 — Branding (teilweise, ehrlich)
+
+- **Greift bereits:** `applicationName: "OPUS DECK"` + `window.title` („OPUS DECK — …",
+  visuell verifiziert).
+- **Fehlt noch:** eigenes **Farb-Theme**. Ein Versuch, die Marken-Palette (near-black +
+  Opus-Gold-Akzent) per `workbench.colorCustomizations` in den Default-Preferences zu setzen,
+  **wirkte nicht** — diese Theia-Version registriert die Farb-Customization-Preference nicht
+  ohne eine Theming-Extension (Konsole: „Linked preference workbench.colorCustomizations not
+  found"). Die Statusleiste bleibt daher vorerst im Theia-Default (lila).
+- **Richtiger Weg (WI-0.3 proper):** ein `packages/ui-kit` mit einer **Theia-/VS-Code-Theme-
+  Contribution** (Design-Tokens als SSoT → Theme-JSON), plus Logo/Favicon. Nächster Schritt.
 
 ## Entscheidungen (verankert)
 
