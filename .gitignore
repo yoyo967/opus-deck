@@ -16,6 +16,8 @@ plugins/
 electron-app/dist/
 src-gen/
 gen-webpack*.js
+gen-esbuild*.mjs
+esbuild.mjs
 .browser_modules/
 
 # Env & Secrets (NIE committen)
