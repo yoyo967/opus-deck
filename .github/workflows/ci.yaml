@@ -1,0 +1,38 @@
+# OPUS DECK CI — waechst mit den Phasen (Masterplan §10).
+# P0: Struktur/Docs. Ab P1 kommen lint -> typecheck -> unit -> e2e (Playwright) -> a11y.
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  structure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pflicht-Artefakte vorhanden
+        run: |
+          test -f README.md
+          test -f docs/MASTERPLAN.md
+          test -f docs/adr/ADR-0001-theia-foundation.md
+          test -f LICENSE
+          echo "P0-Struktur OK"
+
+  # Aktiviert sich, sobald package.json existiert (WI-0.2, Theia-Spike).
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Node-Toolchain (skip bis package.json existiert)
+        run: |
+          if [ -f package.json ]; then
+            corepack enable
+            npm ci
+            npm run check --if-present
+          else
+            echo "Noch kein package.json - Build-Stage wird mit WI-0.2 aktiv."
+          fi

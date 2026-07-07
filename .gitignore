@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+.pnp/
+.yarn/
+
+# Builds
+dist/
+lib/
+build/
+out/
+*.tsbuildinfo
+
+# Theia / Electron
+.theia/
+plugins/
+electron-app/dist/
+
+# Env & Secrets (NIE committen)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Logs / caches
+*.log
+.cache/
+coverage/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+__pycache__/
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
