@@ -6,18 +6,20 @@
   "license": "MIT",
   "dependencies": {
     "@opus-deck/ui-kit": "0.0.1",
-    "@theia/core": "latest",
-    "@theia/editor": "latest",
-    "@theia/filesystem": "latest",
-    "@theia/markers": "latest",
-    "@theia/messages": "latest",
-    "@theia/monaco": "latest",
-    "@theia/navigator": "latest",
-    "@theia/preferences": "latest",
-    "@theia/workspace": "latest"
+    "@theia/core": "1.72.3",
+    "@theia/editor": "1.72.3",
+    "@theia/filesystem": "1.72.3",
+    "@theia/markers": "1.72.3",
+    "@theia/messages": "1.72.3",
+    "@theia/mini-browser": "1.72.3",
+    "@theia/monaco": "1.72.3",
+    "@theia/navigator": "1.72.3",
+    "@theia/preferences": "1.72.3",
+    "@theia/preview": "1.72.3",
+    "@theia/workspace": "1.72.3"
   },
   "devDependencies": {
-    "@theia/cli": "latest"
+    "@theia/cli": "1.72.3"
   },
   "scripts": {
     "clean": "theia clean",

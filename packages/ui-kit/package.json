@@ -5,7 +5,7 @@
   "license": "MIT",
   "main": "browser/branding-module.js",
   "dependencies": {
-    "@theia/core": "latest"
+    "@theia/core": "1.72.3"
   },
   "theiaExtensions": [
     {

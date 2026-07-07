@@ -20,7 +20,9 @@ RUN npm run build -w @opus-deck/workbench
 
 # Standard-Workspace (im Betrieb per-User/Volume; hier ein sichtbares Startverzeichnis)
 RUN mkdir -p /workspace \
- && printf '# Willkommen bei OPUS DECK\n\nDies ist dein Arbeitsbereich. Lege Dateien an,\nlade sie hoch, bearbeite sie im Editor und lade sie herunter.\n' > /workspace/willkommen.md
+ && printf '# Willkommen bei OPUS DECK\n\nDies ist dein **Arbeitsbereich**.\n\n- Dateien anlegen, hochladen, bearbeiten, herunterladen\n- Rechtsklick im Explorer -> Upload Files... / Download\n- Diese Datei: Rechtsklick -> **Open Preview** (Markdown-Vorschau)\n\n> OPUS DECK - die Kommandobruecke fuer Agenten.\n' > /workspace/willkommen.md \
+ && printf 'Name,Rolle,Domaene\nOPUS PRIME EX,Legal/Tax-Agent,Recht\nOPUS DECK,Workbench,Plattform\n' > /workspace/beispiel.csv \
+ && printf '<svg xmlns="http://www.w3.org/2000/svg" width="320" height="120"><rect width="320" height="120" fill="#111317"/><text x="20" y="70" fill="#C9A227" font-family="sans-serif" font-size="34">OPUS DECK</text></svg>\n' > /workspace/logo.svg
 
 EXPOSE 3333
 CMD ["npm", "run", "start:container", "-w", "@opus-deck/workbench"]

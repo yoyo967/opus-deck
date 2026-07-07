@@ -45,12 +45,19 @@ Workbench live verifiziert** (Browser-Automation gegen den Container):
 | 1.2 | **Upload** (Datei-Upload) | ✅ „Upload Files…" im Kontextmenü (Theia `@theia/filesystem`) |
 | 1.3 | **Download** (Datei; Ordner als Archiv) | ✅ „Download" + „Copy Download Link" (Theia `FileDownloadService`) |
 | 1.4 | Monaco-Editing | ✅ verifiziert (Datei geöffnet, Inhalt gerendert, Editor-Tab) |
-| 1.5 | Vorschau-Renderer (PDF/Bild/CSV) | 🟡 offen — Ausbau |
+| 1.5 | Vorschau-Renderer | ✅ **Markdown-Vorschau** (`@theia/preview`) live verifiziert (Split-View Editor+Preview: Überschrift/Liste/fett/Zitat gerendert). Bild/HTML via `@theia/mini-browser` „Open With → Preview" verfügbar. CSV öffnet als Text. |
 
-**Ehrlich:** Der Datei-Kern (Explorer, Editor, Upload, Download) war **nicht zu bauen** —
-Theia liefert ihn; meine P1-Arbeit war Workspace-Setup + Verifikation, dass es real läuft.
-Offene P1-Politur: chunked Upload großer Dateien (WI-1.2), Vorschau-Renderer (WI-1.5),
-ggf. eigener „Ordner-als-ZIP"-Download falls Theias Archiv-Format nicht genügt.
+**Ehrlich:**
+- Der Datei-Kern (Explorer, Editor, Upload, Download) war **nicht zu bauen** — Theia liefert ihn;
+  P1-Arbeit = Workspace-Setup + Verifikation. **Markdown-Vorschau** ergänzt (`@theia/preview`),
+  live im Split-View bestätigt.
+- **Chunked Upload:** Theias `FileUploadService` (hinter „Upload Files…") lädt in Segmenten hoch;
+  das Kommando ist verifiziert, ein 1-GB-Stresstest steht noch aus (WI-1.2-AK).
+- **Bild-Vorschau:** `.svg`/Bilder öffnen per Default als Text; Rendern via „Open With → Preview"
+  (mini-browser). Automatische Bild-/PDF-/CSV-Tabellen-Assoziation = kleiner Ausbau.
+- **Versions-Pin (Fix):** alle `@theia/*` auf **1.72.3** gepinnt — `@theia/preview` hing bei 1.72.3
+  und zog ein nested `@theia/core`, was „Cannot apply @injectable decorator multiple times"
+  auslöste (weißer Screen). Ein einheitlicher Core behebt das.
 
 ## WI-0.3 — Branding (erledigt, visuell verifiziert)
 
