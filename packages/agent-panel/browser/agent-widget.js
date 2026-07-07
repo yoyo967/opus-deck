@@ -1,7 +1,9 @@
-// OPUS DECK — Agent-Panel (S3 Chat-Surface). Erste custom Theia-View.
-// Vorerst eine gebrandete Chat-Shell fuer OPUS PRIME EX; Backend-Anbindung (ACP-Adapter)
-// folgt. Der technische Zweck: beweisen, dass eine eigene View im Workbench rendert —
-// das Fundament fuer alle Agent-Surfaces (Chat, Mission Control, Artifacts).
+// OPUS DECK — Agent-Panel (S3 Chat-Surface). Custom Theia-ReactWidget.
+// Interaktiver Chat gegen den OPUS-PRIME-EX-Backend (/api/models, /api/frage) mit
+// Hybrid-Modellwahl (alle Claude-Modelle + lokales Gemma 4). Zeigt Antwort, gewaehltes
+// Modell, Route, Quellen und Guardrail-Ereignisse — die volle Pipeline sichtbar.
+// State liegt auf der Widget-Instanz; this.update() rendert neu (Eingaben sind
+// unkontrolliert -> Tippen bleibt ueber Re-Render erhalten).
 const { injectable, decorate } = require('@theia/core/shared/inversify');
 const ReactNs = require('@theia/core/shared/react');
 const React = ReactNs.default || ReactNs;
@@ -10,6 +12,9 @@ const { ReactWidget } = require('@theia/core/lib/browser/widgets/react-widget');
 
 const AGENT_WIDGET_ID = 'opus-deck.agent';
 const GOLD = '#C9A227';
+const INK = '#111317';
+// OPUS PRIME EX Referenz-Backend (lokal). Spaeter konfigurierbar / ACP-Adapter.
+const BACKEND = 'http://localhost:8848';
 
 class AgentWidget extends ReactWidget {
   constructor() {
@@ -21,31 +26,126 @@ class AgentWidget extends ReactWidget {
     this.title.closable = true;
     this.addClass('opus-agent-panel');
     this.node.style.overflow = 'auto';
+    this._models = [];
+    this._selected = '';
+    this._messages = [];
+    this._busy = false;
+    this._status = 'Verbinde mit OPUS PRIME EX …';
     this.update();
+    this.loadModels();
+  }
+
+  async loadModels() {
+    try {
+      const resp = await fetch(BACKEND + '/api/models');
+      const data = await resp.json();
+      this._models = data.modelle || [];
+      const sonnet = this._models.find((m) => m.id === 'claude-sonnet-5');
+      this._selected = (sonnet && sonnet.id) || (this._models[0] && this._models[0].id) || '';
+      this._status = '';
+    } catch (e) {
+      this._status = 'Backend nicht erreichbar (' + BACKEND + '). Läuft der OPUS-PRIME-EX-Server?';
+    }
+    this.update();
+  }
+
+  currentModelId() {
+    const sel = this.node.querySelector('.opus-model');
+    return (sel && sel.value) || this._selected;
+  }
+
+  async send() {
+    if (this._busy) return;
+    const input = this.node.querySelector('.opus-frage');
+    const frage = (input && input.value || '').trim();
+    if (!frage) return;
+    const modelId = this.currentModelId();
+    const label = (this._models.find((m) => m.id === modelId) || {}).label || modelId;
+    this._messages.push({ role: 'user', text: frage });
+    if (input) input.value = '';
+    this._busy = true;
+    this._status = 'Frage an ' + label + ' … (lokale CPU-Modelle können 1–5 min brauchen)';
+    this.update();
+    try {
+      const resp = await fetch(BACKEND + '/api/frage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ frage: frage, model_id: modelId }),
+      });
+      const data = await resp.json();
+      this._messages.push({
+        role: 'assistant',
+        text: data.antwort || data.fehler || '(keine Antwort)',
+        blockiert: !data.antwort,
+        meta: {
+          modell: data.modell,
+          route: data.route,
+          domaenen: data.domaenen || [],
+          quellen: (data.quellen || []).length,
+          guardrails: data.guardrails || [],
+        },
+      });
+    } catch (e) {
+      this._messages.push({ role: 'assistant', text: 'Fehler: Backend nicht erreichbar.', blockiert: true, meta: {} });
+    }
+    this._busy = false;
+    this._status = '';
+    this.update();
+  }
+
+  renderMessage(m, i) {
+    const istUser = m.role === 'user';
+    const bubble = {
+      background: istUser ? 'rgba(201,162,39,0.12)' : 'var(--theia-editorWidget-background)',
+      border: '1px solid ' + (m.blockiert ? 'rgba(220,80,80,0.5)' : 'var(--theia-panel-border)'),
+      borderRadius: '8px', padding: '10px 12px', lineHeight: '1.5', fontSize: '12px',
+      whiteSpace: 'pre-wrap', wordBreak: 'break-word',
+    };
+    const kinder = [
+      h('div', { key: 'r', style: { fontSize: '10px', opacity: 0.6, marginBottom: '4px' } },
+        istUser ? 'Du' : (m.meta && m.meta.modell) || 'OPUS PRIME EX'),
+      h('div', { key: 't' }, m.text),
+    ];
+    if (!istUser && m.meta && (m.meta.route || m.meta.guardrails)) {
+      const tags = [];
+      if (m.meta.route) tags.push('Route ' + m.meta.route);
+      if (m.meta.domaenen && m.meta.domaenen.length) tags.push(m.meta.domaenen.join(', '));
+      tags.push(m.meta.quellen + ' Quellen');
+      if (m.meta.guardrails && m.meta.guardrails.length) tags.push('Guardrails: ' + m.meta.guardrails.join(' · '));
+      kinder.push(h('div', { key: 'm', style: { fontSize: '10px', opacity: 0.55, marginTop: '6px', borderTop: '1px solid var(--theia-panel-border)', paddingTop: '5px' } }, tags.join('  ·  ')));
+    }
+    return h('div', { key: i, style: bubble }, kinder);
   }
 
   render() {
     const box = { fontFamily: 'var(--theia-ui-font-family)', color: 'var(--theia-foreground)', fontSize: '12px' };
-    return h('div', { style: Object.assign({ padding: '12px' }, box) }, [
-      h('div', { key: 'hd', style: { display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--theia-panel-border)', paddingBottom: '8px', marginBottom: '12px' } }, [
-        h('span', { key: 'dot', style: { width: '10px', height: '10px', borderRadius: '50%', background: GOLD, display: 'inline-block' } }),
+    const optionen = this._models.map((m) =>
+      h('option', { key: m.id, value: m.id }, m.label + (m.provider === 'gemma' ? '  ·  lokal, kostenlos' : ''))
+    );
+    return h('div', { style: Object.assign({ padding: '12px', display: 'flex', flexDirection: 'column', height: '100%', boxSizing: 'border-box' }, box) }, [
+      h('div', { key: 'hd', style: { display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--theia-panel-border)', paddingBottom: '8px', marginBottom: '10px' } }, [
+        h('span', { key: 'dot', style: { width: '10px', height: '10px', borderRadius: '50%', background: GOLD } }),
         h('strong', { key: 'nm', style: { fontSize: '13px' } }, 'OPUS PRIME EX'),
-        h('span', { key: 'tg', style: { fontSize: '11px', opacity: 0.7 } }, 'Recht & Steuer · DE/EU')
+        h('span', { key: 'tg', style: { fontSize: '11px', opacity: 0.7 } }, 'Recht & Steuer · DE/EU'),
       ]),
-      h('div', { key: 'msgs', style: { display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '12px' } }, [
-        h('div', { key: 'm1', style: { background: 'var(--theia-editorWidget-background)', border: '1px solid var(--theia-panel-border)', borderRadius: '8px', padding: '10px 12px', lineHeight: '1.5' } }, [
-          h('div', { key: 'r', style: { fontSize: '10px', opacity: 0.6, marginBottom: '4px' } }, 'OPUS PRIME EX'),
-          'Willkommen. Ich liefere allgemeine Rechts- und Steuer-Information zu deutschem und EU-Recht — mit Quellenpruefung und Guardrails. Dies ist keine Rechtsberatung.'
-        ])
-      ]),
-      h('div', { key: 'pipe', style: { fontSize: '10px', opacity: 0.55, marginBottom: '12px' } },
-        'Pipeline: Routing → Retrieval → Guardrails G1–G8 → Antwort'),
+      h('label', { key: 'ml', style: { fontSize: '10px', opacity: 0.7, marginBottom: '3px' } }, 'Modell'),
+      h('select', { key: 'sel', className: 'opus-model', defaultValue: this._selected,
+        style: { marginBottom: '10px', padding: '6px', borderRadius: '6px', background: 'var(--theia-input-background)', color: 'var(--theia-input-foreground)', border: '1px solid var(--theia-input-border)', fontSize: '12px' } }, optionen),
+      h('div', { key: 'msgs', style: { flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '10px', minHeight: '60px' } },
+        this._messages.length ? this._messages.map((m, i) => this.renderMessage(m, i))
+          : [h('div', { key: 'empty', style: { fontSize: '11px', opacity: 0.55, lineHeight: 1.5 } },
+              'Willkommen. Stelle eine Frage zu deutschem/EU-Recht. Volle Pipeline mit Quellenprüfung und Guardrails. Keine Rechtsberatung.')]),
+      this._status ? h('div', { key: 'st', style: { fontSize: '10px', opacity: 0.6, marginBottom: '6px' } }, this._status) : null,
+      h('div', { key: 'pipe', style: { fontSize: '10px', opacity: 0.5, marginBottom: '8px' } },
+        'Routing → Retrieval → Guardrails G1–G8 → Antwort'),
       h('div', { key: 'inrow', style: { display: 'flex', gap: '6px' } }, [
-        h('input', { key: 'in', placeholder: 'Frage an OPUS PRIME EX …', disabled: true, style: { flex: 1, padding: '8px', borderRadius: '6px', border: '1px solid var(--theia-input-border)', background: 'var(--theia-input-background)', color: 'var(--theia-input-foreground)', fontSize: '12px' } }),
-        h('button', { key: 'sd', disabled: true, style: { padding: '8px 12px', borderRadius: '6px', border: 'none', background: GOLD, color: '#111317', fontWeight: 600 } }, 'Senden')
+        h('input', { key: 'in', className: 'opus-frage', placeholder: 'Frage an OPUS PRIME EX …', disabled: this._busy,
+          onKeyDown: (e) => { if (e.key === 'Enter') this.send(); },
+          style: { flex: 1, padding: '8px', borderRadius: '6px', border: '1px solid var(--theia-input-border)', background: 'var(--theia-input-background)', color: 'var(--theia-input-foreground)', fontSize: '12px' } }),
+        h('button', { key: 'sd', disabled: this._busy, onClick: () => this.send(),
+          style: { padding: '8px 12px', borderRadius: '6px', border: 'none', background: this._busy ? '#7a6a2e' : GOLD, color: INK, fontWeight: 600, cursor: this._busy ? 'default' : 'pointer' } },
+          this._busy ? '…' : 'Senden'),
       ]),
-      h('div', { key: 'nt', style: { fontSize: '10px', opacity: 0.5, marginTop: '8px' } },
-        'Backend-Anbindung (ACP-Adapter zu OPUS PRIME EX) folgt — P3.')
     ]);
   }
 }

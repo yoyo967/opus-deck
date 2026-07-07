@@ -44,9 +44,17 @@ Antwort), Eingabe + „Senden", Agent-Icon in der rechten Activity Bar. Live ver
 - **Wiring (Muster für alle Surfaces):** `ReactWidget` + `AbstractViewContribution` +
   `WidgetFactory`, in Plain-JS via `decorate(injectable(), …)`; Default-Sichtbarkeit über
   `initializeLayout()` (NICHT `onStart` — der klappt den rechten Bereich nicht auf).
-- **Offen (nächster P3-Schritt):** echte Backend-Anbindung — OPUS-PRIME-EX-**ACP-Adapter**
-  (dünner Wrapper um die bestehende Orchestrator-Pipeline) + Chat live schalten (Streaming,
-  Quellen/Guardrails-Anzeige). Davor/parallel P2 (Gateway/Auth/Projekte).
+- **Live-Chat gewirkt (Schritt 2, verifiziert):** Das Agent-Panel ist interaktiv — **Modell-
+  Dropdown** (aus `GET /api/models` des OPUS-PRIME-EX-Backends, alle Claude-Modelle + lokales
+  Gemma 4), **Senden → `POST /api/frage`** mit gewähltem Modell → Antwort + Modell/Route/Quellen/
+  **Guardrail-Ereignisse** gerendert. CORS im Backend; Timeout 900s (CPU-Inferenz). End-to-end
+  live geprüft: Dropdown lädt vom Backend, Senden feuert den Request, Busy-State + Status
+  („Frage an Gemma 4 E4B … 1–5 min"). Backend-Antwort + Guardrails separat direkt verifiziert
+  (lokales Gemma, **kostenlos**; E4B halluzinierte → G3/G4 **blockierten** korrekt → Sicherheits-
+  Ablehnung. Beweist: Guardrails schützen modellunabhängig; E4B-Qualität für Recht noch zu schwach).
+- **Offen (nächster P3-Schritt):** Formalisierung als **ACP-Adapter** (statt Direkt-HTTP),
+  Streaming, und **OPUS FLOW F0** (Daemon + ACP + read-Tools, siehe [FLOW_STUDIO.md](FLOW_STUDIO.md)).
+  Ehrliche UX-Grenze: Gemma auf CPU ~5 min/Frage — GPU (GCP) oder kleineres/quantisiertes Modell fürs Tempo.
 
 ## Phase P1 — Editor & Dateien (Kern verifiziert)
 
