@@ -4,11 +4,10 @@
 
 ## Kurzfassung
 
-**P0 komplett + P1-Kern verifiziert.** Der Theia-Workbench läuft gebrandet („OPUS DECK",
-Opus-Gold-Akzent) im Linux-Container (= Cloud-Run-Target). **Editor + Dateien end-to-end
-live bestätigt:** Workspace öffnet, Explorer zeigt Dateien, Monaco öffnet/rendert Inhalt,
-Kontextmenü bietet **Upload** und **Download** — alles aus Theias Standard-Paketen. Details
-unten (Phase P1).
+**P0 komplett · P1-Kern verifiziert · P3-Fundament gelegt.** Der gebrandete Theia-Workbench
+(„OPUS DECK", Opus-Gold) läuft im Linux-Container (= Cloud-Run-Target). **Editor + Dateien
+end-to-end** (Explorer, Monaco, Upload, Download, Markdown-Vorschau) und die **erste custom
+Agent-View** (OPUS-PRIME-EX-Chat-Shell im rechten Panel) sind live verifiziert. Details unten.
 
 ## Phase P0 — Fortschritt
 
@@ -32,6 +31,22 @@ unten (Phase P1).
   das Produktions-Target (Linux/Cloud Run). Lokal starten:
   `docker build -t opus-deck-workbench apps/workbench && docker run -p 3333:3333 opus-deck-workbench`
   → http://127.0.0.1:3333
+
+## Phase P3 — Agent-Panel (Fundament gelegt)
+
+**Erste custom OPUS-DECK-View rendert im Workbench** — der technische Durchbruch für alle
+Agent-Surfaces. `packages/agent-panel` (Theia `ReactWidget`) zeigt im rechten Seitenbereich
+eine gebrandete **OPUS-PRIME-EX-Chat-Shell**: Header (gold, „Recht & Steuer · DE/EU"),
+Begrüßung mit Pflicht-Disclaimer, Pipeline-Zeile (Routing → Retrieval → Guardrails G1–G8 →
+Antwort), Eingabe + „Senden", Agent-Icon in der rechten Activity Bar. Live verifiziert
+(sichtbar, 313 px, Inhalt gerendert, 0/0).
+
+- **Wiring (Muster für alle Surfaces):** `ReactWidget` + `AbstractViewContribution` +
+  `WidgetFactory`, in Plain-JS via `decorate(injectable(), …)`; Default-Sichtbarkeit über
+  `initializeLayout()` (NICHT `onStart` — der klappt den rechten Bereich nicht auf).
+- **Offen (nächster P3-Schritt):** echte Backend-Anbindung — OPUS-PRIME-EX-**ACP-Adapter**
+  (dünner Wrapper um die bestehende Orchestrator-Pipeline) + Chat live schalten (Streaming,
+  Quellen/Guardrails-Anzeige). Davor/parallel P2 (Gateway/Auth/Projekte).
 
 ## Phase P1 — Editor & Dateien (Kern verifiziert)
 

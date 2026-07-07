@@ -11,6 +11,7 @@ WORKDIR /app
 # Manifeste zuerst (Layer-Cache): Root + Workspaces
 COPY package.json ./
 COPY packages/ui-kit/package.json packages/ui-kit/
+COPY packages/agent-panel/package.json packages/agent-panel/
 COPY apps/workbench/package.json apps/workbench/
 RUN npm install --no-audit --no-fund
 

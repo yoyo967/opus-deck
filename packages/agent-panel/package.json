@@ -1,0 +1,15 @@
+{
+  "name": "@opus-deck/agent-panel",
+  "version": "0.0.1",
+  "description": "OPUS DECK — Agent panel (S3 Chat surface) for OPUS PRIME EX & ACP agents",
+  "license": "MIT",
+  "main": "browser/agent-frontend-module.js",
+  "dependencies": {
+    "@theia/core": "1.72.3"
+  },
+  "theiaExtensions": [
+    {
+      "frontend": "browser/agent-frontend-module"
+    }
+  ]
+}
