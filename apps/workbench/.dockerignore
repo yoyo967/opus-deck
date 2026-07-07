@@ -1,6 +1,0 @@
-node_modules
-lib
-gen-webpack*.js
-src-gen
-.theia
-*.log

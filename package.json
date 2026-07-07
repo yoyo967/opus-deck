@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "name": "opus-deck",
+  "version": "0.0.1",
+  "description": "OPUS DECK — VS-Code-styled multi-agent workbench (monorepo root)",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
+}
