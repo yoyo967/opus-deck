@@ -4,12 +4,11 @@
 
 ## Kurzfassung
 
-**P0 (Fundament) läuft — die Wette steht.** Repo spec-/docs-first aufgesetzt; **der
-Theia-Spike (WI-0.2) ist end-to-end bewiesen**: Theia installiert + baut fehlerfrei und
-serviert einen laufenden, VS-Code-artigen Workbench mit unserer Marke „OPUS DECK"
-(HTTP 200, `<title>OPUS DECK</title>`, Menüleiste File/Edit/…/Help, Activity Bar,
-Statusleiste 0 Fehler/0 Warnungen, Konsole sauber). Verifiziert **im Linux-Container**
-(= Ziel-Target Cloud Run, ADR-0003).
+**P0 komplett + P1-Kern verifiziert.** Der Theia-Workbench läuft gebrandet („OPUS DECK",
+Opus-Gold-Akzent) im Linux-Container (= Cloud-Run-Target). **Editor + Dateien end-to-end
+live bestätigt:** Workspace öffnet, Explorer zeigt Dateien, Monaco öffnet/rendert Inhalt,
+Kontextmenü bietet **Upload** und **Download** — alles aus Theias Standard-Paketen. Details
+unten (Phase P1).
 
 ## Phase P0 — Fortschritt
 
@@ -33,6 +32,25 @@ Statusleiste 0 Fehler/0 Warnungen, Konsole sauber). Verifiziert **im Linux-Conta
   das Produktions-Target (Linux/Cloud Run). Lokal starten:
   `docker build -t opus-deck-workbench apps/workbench && docker run -p 3333:3333 opus-deck-workbench`
   → http://127.0.0.1:3333
+
+## Phase P1 — Editor & Dateien (Kern verifiziert)
+
+Standard-Workspace `/workspace` wird beim Start geöffnet; Trust-Prompt deaktiviert
+(sauberer Start). **Der Datei-Kern kommt aus Theias Standard-Paketen und ist im laufenden
+Workbench live verifiziert** (Browser-Automation gegen den Container):
+
+| WI | Beschreibung | Status |
+|----|--------------|--------|
+| 1.1 | Explorer CRUD (Neu/Umbenennen/Löschen/Duplizieren/Copy-Paste) | ✅ verifiziert (Kontextmenü + „New File/Folder"-Buttons) |
+| 1.2 | **Upload** (Datei-Upload) | ✅ „Upload Files…" im Kontextmenü (Theia `@theia/filesystem`) |
+| 1.3 | **Download** (Datei; Ordner als Archiv) | ✅ „Download" + „Copy Download Link" (Theia `FileDownloadService`) |
+| 1.4 | Monaco-Editing | ✅ verifiziert (Datei geöffnet, Inhalt gerendert, Editor-Tab) |
+| 1.5 | Vorschau-Renderer (PDF/Bild/CSV) | 🟡 offen — Ausbau |
+
+**Ehrlich:** Der Datei-Kern (Explorer, Editor, Upload, Download) war **nicht zu bauen** —
+Theia liefert ihn; meine P1-Arbeit war Workspace-Setup + Verifikation, dass es real läuft.
+Offene P1-Politur: chunked Upload großer Dateien (WI-1.2), Vorschau-Renderer (WI-1.5),
+ggf. eigener „Ordner-als-ZIP"-Download falls Theias Archiv-Format nicht genügt.
 
 ## WI-0.3 — Branding (erledigt, visuell verifiziert)
 

@@ -18,5 +18,9 @@ RUN npm install --no-audit --no-fund
 COPY . ./
 RUN npm run build -w @opus-deck/workbench
 
+# Standard-Workspace (im Betrieb per-User/Volume; hier ein sichtbares Startverzeichnis)
+RUN mkdir -p /workspace \
+ && printf '# Willkommen bei OPUS DECK\n\nDies ist dein Arbeitsbereich. Lege Dateien an,\nlade sie hoch, bearbeite sie im Editor und lade sie herunter.\n' > /workspace/willkommen.md
+
 EXPOSE 3333
 CMD ["npm", "run", "start:container", "-w", "@opus-deck/workbench"]
