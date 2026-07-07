@@ -10,10 +10,13 @@ build/
 out/
 *.tsbuildinfo
 
-# Theia / Electron
+# Theia generierte Artefakte
 .theia/
 plugins/
 electron-app/dist/
+src-gen/
+gen-webpack*.js
+.browser_modules/
 
 # Env & Secrets (NIE committen)
 .env

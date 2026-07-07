@@ -1,0 +1,39 @@
+{
+  "private": true,
+  "name": "@opus-deck/workbench",
+  "version": "0.0.1",
+  "description": "OPUS DECK workbench (Theia browser app) — WI-0.2 spike",
+  "license": "MIT",
+  "dependencies": {
+    "@theia/core": "latest",
+    "@theia/editor": "latest",
+    "@theia/filesystem": "latest",
+    "@theia/markers": "latest",
+    "@theia/messages": "latest",
+    "@theia/monaco": "latest",
+    "@theia/navigator": "latest",
+    "@theia/preferences": "latest",
+    "@theia/workspace": "latest"
+  },
+  "devDependencies": {
+    "@theia/cli": "latest"
+  },
+  "scripts": {
+    "clean": "theia clean",
+    "build": "theia build --mode development",
+    "start": "theia start --hostname 127.0.0.1 --port 3333",
+    "watch": "theia build --watch --mode development"
+  },
+  "theia": {
+    "target": "browser",
+    "frontend": {
+      "config": {
+        "applicationName": "OPUS DECK",
+        "preferences": {
+          "files.enableTrash": false,
+          "workbench.colorTheme": "dark"
+        }
+      }
+    }
+  }
+}
