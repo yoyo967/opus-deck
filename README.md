@@ -29,6 +29,7 @@ P0–P8) und die **[ADRs](docs/adr/)**.
 | [0002](docs/adr/ADR-0002-acp-agent-interop.md) | **ACP + MCP** als Agent-/Tool-Anbindung (Multi-Agent-Home) |
 | [0003](docs/adr/ADR-0003-web-first.md) | **Web zuerst** (Cloud Run EU), Desktop später aus derselben Codebase |
 | [0004](docs/adr/ADR-0004-flow-studio-agent.md) | **OPUS FLOW** — lokaler Desktop-/Dev-Automations-Agent (Gemma 4) als 2. OPUS-DECK-Mieter ([Spec](spec/FLOW_STUDIO.md)) |
+| [0005](docs/adr/ADR-0005-second-brain.md) | **Second Brain** — geteiltes, agentengepflegtes Wissen (Karpathy-LLM-Wiki-Muster) als MCP-Server ([Spec](spec/SECOND_BRAIN.md)) |
 
 ## Repo-Struktur (Ziel)
 
