@@ -59,18 +59,19 @@
 | Menschliche Letztverantwortung | **RA/StB-Sign-off** vor produktivem Rechts-Output | `review/human_signoff_checklist.md` | ✅ |
 | Entscheidungsprozess | ADR-Prozess (versioniert, begründet) | `docs/adr/` | ✅ |
 | Offene Risiken sichtbar | OPEN_QUESTIONS / Gap-Listen | `OPEN_QUESTIONS*`, dieses Dok | ✅ |
-| Rollen-/Verantwortungsmatrix | — | — | ⬜ **Gap** |
-| Incident-Response-Prozess | — | — | ⬜ **Gap** |
+| Rollen-/Verantwortungsmatrix | RACI über alle Rollen (Owner/Agent/RA-StB/…) | `docs/governance/roles_responsibilities.md` | ✅ |
+| Incident-Response-Prozess | 6-Schritt-Runbook + Sofortmaßnahmen (rotate/privat/stop) | `docs/governance/incident_response.md` | ✅ |
 | Formales Risikoregister | — | — | ⬜ **Gap** |
 
 ## Gap-Backlog (priorisiert, nicht auf einmal)
 
-1. **Rollen-/Verantwortungsmatrix** (Block 4) — leichtgewichtig, hoher A5-Hebel. *(nächster A5-Schritt)*
-2. **Incident-Response-Prozess** (Block 4) — kurzer Runbook-Doc.
-3. **Threat-Model** (Block 2) — für OPUS DECK Gateway + Flow-Studio-Sandbox.
-4. **Model Cards** (Block 3) — je Modell im Katalog (Zweck, Grenzen, Daten).
-5. **Bias-/Robustheits-Tests + Uncertainty** (Block 1) — Test-Erweiterung.
-6. **OSCAL-Integration** — A5-Kriterien maschinenlesbar als CI-Compliance-Lint / Audit-Dashboard.
+1. ~~Rollen-/Verantwortungsmatrix (Block 4)~~ — ✅ erledigt 2026-07-08 (`docs/governance/roles_responsibilities.md`).
+2. ~~Incident-Response-Prozess (Block 4)~~ — ✅ erledigt 2026-07-08 (`docs/governance/incident_response.md`).
+3. **Threat-Model** (Block 2) — für OPUS DECK Gateway + Flow-Studio-Sandbox + öffentliche Deploy-Exposition. *(nächster A5-Schritt)*
+4. **IAP/Auth-Härtung** (Block 2) — öffentliche Cloud-Exposition ist Demo (Token = Bremsschwelle); harte Absicherung offen.
+5. **Model Cards** (Block 3) — je Modell im Katalog (Zweck, Grenzen, Daten).
+6. **Bias-/Robustheits-Tests + Uncertainty** (Block 1) — Test-Erweiterung.
+7. **Formales Risikoregister** (Block 4) + **OSCAL-Integration** (CI-Compliance-Lint / Audit-Dashboard).
 
 ## Pflege
 
