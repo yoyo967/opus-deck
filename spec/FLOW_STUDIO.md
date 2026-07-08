@@ -127,8 +127,12 @@ Nutzt das in OPUS PRIME EX gebaute Muster (Modell-Katalog, `build_llm_client`):
 
 Jede Flow-Phase härtet zugleich eine OPUS-DECK-Surface (Co-Development).
 
-- **F0 — Daemon-Skelett + ACP:** OPUS-FLOW-Daemon spricht ACP mit OPUS DECK; nur **read**-Tools
-  (`fs.list_files`, `git.status`). *Härtet: ACP-Host + MCP-Broker.* *AK:* read-Tool-Ergebnis im Panel.
+- **F0 — Daemon-Skelett + read-Tools ✅ (2026-07-08, Repo `opus-flow`):** read-Tools
+  (`fs.list_files`, `fs.read_file`, `git.status`, `git.diff`) mit vollem Sicherheits-Kontrakt
+  (Scope/Traversal-Schutz, Wirkungsklassen, strukturierte Ausgabe, Secret-Redaction) als
+  **MCP-Server**. *Ehrliche Abweichung:* MCP statt ACP (ACP-Host zurückgestellt; MCP = Broker-Schicht
+  §2). Gates grün (ruff/mypy/pytest 13), Dogfood verifiziert. *Offen für AK „im Panel":* ein
+  Flow-Panel in OPUS DECK, das die read-Ergebnisse zeigt (nächst).
 - **F1 — Shell mit Gate:** `shell.execute_powershell` (Allowlist) + Approval + Audit.
   *Härtet: Permission-Broker + Audit.* *AK:* Kommando erst nach Klick; Schritt im Audit-Log.
 - **F2 — Planner (Plan→Approve→Execute) + Dry-Run.** *Härtet: Mission Control.* *AK:* mehrstufiger
