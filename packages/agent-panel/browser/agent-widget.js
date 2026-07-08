@@ -13,12 +13,10 @@ const { ReactWidget } = require('@theia/core/lib/browser/widgets/react-widget');
 const AGENT_WIDGET_ID = 'opus-deck.agent';
 const GOLD = '#C9A227';
 const INK = '#111317';
-// Backend-Origin: lokal 127.0.0.1:8848; in der Cloud das private-aber-erreichbare Cloud-Run-
-// Backend (per Demo-Token geschuetzt). Spaeter konfigurierbar / ACP-Adapter.
-const _LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-const BACKEND = _LOCAL ? 'http://localhost:8848' : 'https://opus-prime-ex-backend-805048455261.europe-west3.run.app';
-// Oeffentlicher Demo-Token (Client-seitig -> nur Bremsschwelle/Kostenschutz, KEIN Secret; rotierbar).
-const OPUS_TOKEN = 'tpoTRtgo-dBtnAgani7tKt32';
+// /api IMMER same-origin ('') -> das Workbench-Backend (api-proxy) leitet an OPUS_BACKEND_URL
+// weiter (Cloud: privates Backend mit Identity-Token; lokal: OPUS_BACKEND_URL=http://localhost:8848,
+// dann ohne Token). Kein Client-Token, kein CORS, funktioniert auch ueber den Auth-Proxy-Tunnel.
+const BACKEND = '';
 
 class AgentWidget extends ReactWidget {
   constructor() {
@@ -73,7 +71,7 @@ class AgentWidget extends ReactWidget {
     try {
       const resp = await fetch(BACKEND + '/api/frage', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Opus-Token': OPUS_TOKEN },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ frage: frage, model_id: modelId }),
       });
       const data = await resp.json();

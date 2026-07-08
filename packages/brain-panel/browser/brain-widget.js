@@ -13,11 +13,9 @@ const { ReactWidget } = require('@theia/core/lib/browser/widgets/react-widget');
 const BRAIN_WIDGET_ID = 'opus-deck.brain';
 const GOLD = '#C9A227';
 const INK = '#111317';
-// Backend-Origin: lokal 127.0.0.1:8848; in der Cloud das Cloud-Run-Backend (Demo-Token-geschuetzt).
-const _LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-const BACKEND = _LOCAL ? 'http://localhost:8848' : 'https://opus-prime-ex-backend-805048455261.europe-west3.run.app';
-// Oeffentlicher Demo-Token (Client-seitig -> nur Bremsschwelle, KEIN Secret; rotierbar).
-const OPUS_TOKEN = 'tpoTRtgo-dBtnAgani7tKt32';
+// /api IMMER same-origin ('') -> das Workbench-Backend (api-proxy) leitet an OPUS_BACKEND_URL
+// weiter (Cloud: privates Backend mit Identity-Token; lokal: OPUS_BACKEND_URL=http://localhost:8848).
+const BACKEND = '';
 
 class BrainWidget extends ReactWidget {
   constructor() {
@@ -95,7 +93,7 @@ class BrainWidget extends ReactWidget {
     this.update();
     try {
       const resp = await fetch(BACKEND + '/api/brain/' + aktion, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Opus-Token': OPUS_TOKEN },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: id }),
       });
       const data = await resp.json();
@@ -121,7 +119,7 @@ class BrainWidget extends ReactWidget {
     this.update();
     try {
       const resp = await fetch(BACKEND + '/api/brain/add_raw', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Opus-Token': OPUS_TOKEN },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ titel: titel.trim() || 'Notiz', inhalt: inhalt, tags: tags }),
       });
       const data = await resp.json();
