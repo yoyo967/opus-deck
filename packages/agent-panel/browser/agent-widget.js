@@ -13,8 +13,12 @@ const { ReactWidget } = require('@theia/core/lib/browser/widgets/react-widget');
 const AGENT_WIDGET_ID = 'opus-deck.agent';
 const GOLD = '#C9A227';
 const INK = '#111317';
-// OPUS PRIME EX Referenz-Backend (lokal). Spaeter konfigurierbar / ACP-Adapter.
-const BACKEND = 'http://localhost:8848';
+// Backend-Origin: lokal 127.0.0.1:8848; in der Cloud das private-aber-erreichbare Cloud-Run-
+// Backend (per Demo-Token geschuetzt). Spaeter konfigurierbar / ACP-Adapter.
+const _LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+const BACKEND = _LOCAL ? 'http://localhost:8848' : 'https://opus-prime-ex-backend-805048455261.europe-west3.run.app';
+// Oeffentlicher Demo-Token (Client-seitig -> nur Bremsschwelle/Kostenschutz, KEIN Secret; rotierbar).
+const OPUS_TOKEN = 'tpoTRtgo-dBtnAgani7tKt32';
 
 class AgentWidget extends ReactWidget {
   constructor() {
@@ -69,7 +73,7 @@ class AgentWidget extends ReactWidget {
     try {
       const resp = await fetch(BACKEND + '/api/frage', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Opus-Token': OPUS_TOKEN },
         body: JSON.stringify({ frage: frage, model_id: modelId }),
       });
       const data = await resp.json();
