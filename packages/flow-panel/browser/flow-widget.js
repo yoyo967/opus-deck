@@ -38,6 +38,7 @@ class FlowWidget extends ReactWidget {
     this._dry = null;
     this._pending = [];
     this._audit = [];
+    this._workflows = [];
     this._status = '';
     this._busy = false;
     this.update();
@@ -140,6 +141,50 @@ class FlowWidget extends ReactWidget {
 
   async loadPending() { try { this._pending = (await this._get('/api/flow/pending')).pending || []; } catch (e) { /* still */ } }
   async loadAudit() { try { this._audit = (await this._get('/api/flow/audit')).eintraege || []; } catch (e) { /* still */ } }
+  async loadWorkflows() { try { this._workflows = (await this._get('/api/flow/workflows')).workflows || []; } catch (e) { /* still */ } }
+
+  // ${param}-Platzhalter aus allen String-Args der Plan-Schritte sammeln.
+  _paramsAusPlan(schritte) {
+    const re = /\$\{(\w+)\}/g; const set = new Set();
+    (schritte || []).forEach((s) => Object.values(s.args || {}).forEach((v) => {
+      if (typeof v === 'string') { let m; while ((m = re.exec(v))) set.add(m[1]); }
+    }));
+    return Array.from(set);
+  }
+
+  async saveWorkflow() {
+    if (!this._plan || !this._plan.plan) return;
+    const name = ((this.node.querySelector('.flow-wf-name') || {}).value || '').trim();
+    if (!name) { this._status = 'Bitte einen Namen fuer den Workflow angeben.'; this.update(); return; }
+    const schritte = this._plan.plan.map((s) => ({ tool: s.tool, args: s.args || {} }));
+    this._busy = true; this._status = 'Speichere Workflow …'; this.update();
+    try {
+      const d = await this._post('/api/flow/workflow/save', { name: name, schritte: schritte, params: this._paramsAusPlan(schritte) });
+      this._status = d.fehler ? d.fehler : ('Workflow „' + (d.name || name) + '" gespeichert.');
+      await this.loadWorkflows(); this._tab = 'flows';
+    } catch (e) { this._status = 'Daemon nicht erreichbar.'; }
+    this._busy = false; this.update();
+  }
+
+  async runWorkflow(wf) {
+    const params = {};
+    (wf.params || []).forEach((p) => {
+      const el = this.node.querySelector('.flow-wfp-' + wf.id + '-' + p);
+      if (el && el.value) params[p] = el.value;
+    });
+    this._busy = true; this._status = 'Spiele „' + wf.name + '" ab …'; this._ergebnis = null; this.update();
+    try {
+      const d = await this._post('/api/flow/workflow/run', { id: wf.id, params: params });
+      if (d.fehler) { this._status = d.fehler; }
+      else {
+        const offen = (d.ergebnisse || []).some((r) => r && r.pending);
+        this._wfErgebnis = d;
+        if (offen) { this._status = 'Ein oder mehr Schritte brauchen Freigabe. Tab „Freigaben".'; await this.loadPending(); }
+        else { this._status = 'Workflow „' + d.workflow + '" abgespielt.'; }
+      }
+    } catch (e) { this._status = 'Daemon nicht erreichbar.'; }
+    this._busy = false; this.update();
+  }
 
   async decide(id, aktion) {
     this._busy = true; this._status = aktion === 'approve' ? 'Freigeben + ausfuehren …' : 'Ablehnen …'; this.update();
@@ -156,6 +201,7 @@ class FlowWidget extends ReactWidget {
     this._tab = t; this._status = '';
     if (t === 'gate') this.loadPending();
     if (t === 'audit') this.loadAudit();
+    if (t === 'flows') this.loadWorkflows();
     this.update();
   }
 
@@ -202,6 +248,12 @@ class FlowWidget extends ReactWidget {
         p && p.plan ? h('button', { key: 'd', disabled: this._busy, onClick: () => this.dryRun(),
           style: { padding: '7px 12px', borderRadius: '6px', border: '1px solid ' + GOLD, background: 'transparent', color: GOLD, cursor: 'pointer', fontWeight: 600 } }, 'Dry-Run') : null,
       ]),
+      p && p.plan ? h('div', { key: 'save', style: { display: 'flex', gap: '6px', alignItems: 'center' } }, [
+        h('input', { key: 'nm', className: 'flow-wf-name', placeholder: 'Als Workflow speichern (Name)…', style: Object.assign({}, inputStyle(), { flex: 1 }) }),
+        h('button', { key: 'sv', disabled: this._busy, onClick: () => this.saveWorkflow(),
+          style: { padding: '7px 12px', borderRadius: '6px', border: '1px solid ' + GOLD, background: 'transparent', color: GOLD, cursor: 'pointer', fontWeight: 600, whiteSpace: 'nowrap' } }, 'Speichern'),
+      ]) : null,
+      p && p.plan ? h('div', { key: 'ph', style: hint() }, 'Tipp: Argumente mit ${name} machen den Workflow parametrisierbar (Werte beim Abspielen).') : null,
       p && p.plan ? h('div', { key: 'pl', style: { display: 'flex', flexDirection: 'column', gap: '6px' } },
         p.plan.map((s, i) => {
           const dv = this._dry && this._dry[i];
@@ -250,9 +302,26 @@ class FlowWidget extends ReactWidget {
     ]);
   }
 
+  renderWorkflows() {
+    return h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px' } }, [
+      h('div', { key: 'n', style: hint() }, 'Gespeicherte Fluesse. Abspielen laeuft durch DIESELBEN Gates (Scope + Freigabe je Wirkungsklasse).'),
+      this._workflows.length ? h('div', { key: 'l', style: { display: 'flex', flexDirection: 'column', gap: '7px' } },
+        this._workflows.map((wf) => h('div', { key: wf.id, style: karte() }, [
+          h('div', { key: 'h', style: { display: 'flex', gap: '6px', alignItems: 'center' } }, [
+            h('strong', { style: { fontSize: '12px' } }, wf.name),
+            h('span', { style: { fontSize: '9px', opacity: 0.5 } }, wf.schritte_n + ' Schritt(e)')]),
+          ...(wf.params || []).map((p) => h('input', { key: p, className: 'flow-wfp-' + wf.id + '-' + p, placeholder: p, style: Object.assign({}, inputStyle(), { marginTop: '4px' }) })),
+          h('button', { key: 'run', disabled: this._busy, onClick: () => this.runWorkflow(wf),
+            style: Object.assign({}, btn(this._busy), { alignSelf: 'flex-start', marginTop: '6px' }) }, '▶ Abspielen'),
+        ]))) : h('div', { key: 'e', style: hint() }, 'Noch keine Workflows. Im Tab „Plan" einen Plan erstellen und speichern.'),
+      this.renderErgebnis(),
+    ]);
+  }
+
   render() {
-    const tabs = [['run', 'Ausfuehren'], ['plan', 'Plan'], ['gate', 'Freigaben'], ['audit', 'Audit']];
+    const tabs = [['run', 'Ausfuehren'], ['plan', 'Plan'], ['flows', 'Workflows'], ['gate', 'Freigaben'], ['audit', 'Audit']];
     const body = this._tab === 'run' ? this.renderRun() : this._tab === 'plan' ? this.renderPlan()
+      : this._tab === 'flows' ? this.renderWorkflows()
       : this._tab === 'gate' ? this.renderGate() : this.renderAudit();
     return h('div', { style: { fontFamily: 'var(--theia-ui-font-family)', color: 'var(--theia-foreground)', fontSize: '12px', padding: '12px', display: 'flex', flexDirection: 'column', height: '100%', boxSizing: 'border-box' } }, [
       h('div', { key: 'hd', style: { display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--theia-panel-border)', paddingBottom: '8px', marginBottom: '10px' } }, [
