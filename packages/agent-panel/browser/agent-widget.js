@@ -119,9 +119,11 @@ class AgentWidget extends ReactWidget {
 
   render() {
     const box = { fontFamily: 'var(--theia-ui-font-family)', color: 'var(--theia-foreground)', fontSize: '12px' };
-    const optionen = this._models.map((m) =>
-      h('option', { key: m.id, value: m.id }, m.label + (m.provider === 'gemma' ? '  ·  lokal, kostenlos' : ''))
-    );
+    const optionen = this._models.map((m) => {
+      // "lokal, kostenlos" nur fuer LOKALES Gemma — Cloud-GPU (-cloud) ist weder lokal noch gratis.
+      const istLokalesGemma = m.provider === 'gemma' && m.id.indexOf('-cloud') === -1;
+      return h('option', { key: m.id, value: m.id }, m.label + (istLokalesGemma ? '  ·  lokal, kostenlos' : ''));
+    });
     return h('div', { style: Object.assign({ padding: '12px', display: 'flex', flexDirection: 'column', height: '100%', boxSizing: 'border-box' }, box) }, [
       h('div', { key: 'hd', style: { display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--theia-panel-border)', paddingBottom: '8px', marginBottom: '10px' } }, [
         h('span', { key: 'dot', style: { width: '10px', height: '10px', borderRadius: '50%', background: GOLD } }),
