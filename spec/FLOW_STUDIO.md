@@ -131,14 +131,19 @@ Jede Flow-Phase härtet zugleich eine OPUS-DECK-Surface (Co-Development).
   (`fs.list_files`, `fs.read_file`, `git.status`, `git.diff`) mit vollem Sicherheits-Kontrakt
   (Scope/Traversal-Schutz, Wirkungsklassen, strukturierte Ausgabe, Secret-Redaction) als
   **MCP-Server**. *Ehrliche Abweichung:* MCP statt ACP (ACP-Host zurückgestellt; MCP = Broker-Schicht
-  §2). Gates grün (ruff/mypy/pytest 13), Dogfood verifiziert. *Offen für AK „im Panel":* ein
-  Flow-Panel in OPUS DECK, das die read-Ergebnisse zeigt (nächst).
-- **F1 — Shell mit Gate:** `shell.execute_powershell` (Allowlist) + Approval + Audit.
-  *Härtet: Permission-Broker + Audit.* *AK:* Kommando erst nach Klick; Schritt im Audit-Log.
-- **F2 — Planner (Plan→Approve→Execute) + Dry-Run.** *Härtet: Mission Control.* *AK:* mehrstufiger
-  Plan sichtbar, einzelne Freigabe, Dry-Run zeigt Wirkung vor Ausführung.
-- **F3 — Artifacts/Replay/Workflow-Speicherung** (JSON/YAML). *Härtet: Artifacts-Surface.*
-  *AK:* Flow als Workflow gespeichert + reproduzierbar wiederholt (Gates greifen erneut).
+  §2). Gates grün (ruff/mypy/pytest), Dogfood verifiziert. **AK „im Panel" ✅** — Flow-Panel in
+  OPUS DECK zeigt die Ergebnisse (siehe unten).
+- **F1 — Shell mit Gate ✅ (2026-07-08):** `shell.execute_powershell` (Allowlist + Denylist +
+  Timeout + Redaction) + **Permission-Gate** (read auto, exec/write/ui → PENDING → menschliche
+  Freigabe) + **append-only Audit** (auto/user). Lokale HTTP-API (`apps/api/server.py`, 127.0.0.1).
+  *AK erfüllt:* Kommando erst nach Klick, Schritt im Audit-Log — **end-to-end im Panel verifiziert**.
+- **F2 — Planner (Plan→Approve→Execute) 🟡 teilweise:** Planner (`planner.py`) macht aus einem
+  Befehl via lokalem Gemma einen Schrittplan (PLAN-Phase, im Panel-Tab „Plan"). Offen: Dry-Run +
+  schrittweise Ketten-Ausführung mit Re-Plan.
+- **F3 — Artifacts/Replay/Workflow-Speicherung 🟡 teilweise:** Audit-Log (append-only) steht +
+  ist im Panel sichtbar. Offen: Replay + parametrisierte Workflow-Speicherung (JSON/YAML).
+- **OPUS-DECK-Panel ✅:** `@opus-deck/flow-panel` (Ausführen/Plan/Freigaben/Audit) — das Gate ist
+  in der UI (PENDING → Freigeben/Ablehnen). Verdrahtet + im Browser end-to-end verifiziert.
 - **F4 — GUI-Automation** (Accessibility/DOM; Electron/Web zuerst). *AK:* Klick+Fill in einer
   Ziel-App verifiziert; Screenshot je Schritt.
 - **F5 — Hybrid-Modell, Parametrisierung, Härtung** (Scope-Editor, Denylist-Pflege, Undo,
