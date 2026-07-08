@@ -137,9 +137,13 @@ Jede Flow-Phase härtet zugleich eine OPUS-DECK-Surface (Co-Development).
   Timeout + Redaction) + **Permission-Gate** (read auto, exec/write/ui → PENDING → menschliche
   Freigabe) + **append-only Audit** (auto/user). Lokale HTTP-API (`apps/api/server.py`, 127.0.0.1).
   *AK erfüllt:* Kommando erst nach Klick, Schritt im Audit-Log — **end-to-end im Panel verifiziert**.
-- **F2 — Planner (Plan→Approve→Execute) 🟡 teilweise:** Planner (`planner.py`) macht aus einem
-  Befehl via lokalem Gemma einen Schrittplan (PLAN-Phase, im Panel-Tab „Plan"). Offen: Dry-Run +
-  schrittweise Ketten-Ausführung mit Re-Plan.
+- **F2 — Planner (Plan→Dry-Run→Execute) ✅ (2026-07-08):** Planner (`planner.py`, lokales Gemma) →
+  Schrittplan; **Dry-Run** (`daemon.dry_run`, Endpoint `/api/flow/dry_run`) validiert jeden Schritt
+  gegen Scope + Allowlist/Denylist **ohne Nebeneffekt** (zeigt ✓/✗ + Grund vor jeder Wirkung);
+  **schrittweise gegatete Ausführung** aus dem Plan (read sofort, exec → Gate). *AK erfüllt:*
+  mehrstufiger Plan sichtbar, einzelne Freigabe, Dry-Run zeigt Wirkung vorab — **im Cloud-UI
+  verifiziert**. Offen (Feinschliff): automatische Ketten-Ausführung mit Re-Plan; Gemma-4-
+  Function-Calling-Zuverlässigkeit gegen einen Flow-Eval messen (§7/§9).
 - **F3 — Artifacts/Replay/Workflow-Speicherung 🟡 teilweise:** Audit-Log (append-only) steht +
   ist im Panel sichtbar. Offen: Replay + parametrisierte Workflow-Speicherung (JSON/YAML).
 - **OPUS-DECK-Panel ✅:** `@opus-deck/flow-panel` (Ausführen/Plan/Freigaben/Audit) — das Gate ist
