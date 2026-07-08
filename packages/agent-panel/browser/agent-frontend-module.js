@@ -18,9 +18,14 @@ class AgentViewContribution extends AbstractViewContribution {
       toggleCommandId: 'opusDeck.agent.toggle',
     });
   }
-  // Default-Layout: Agent-View rechts sichtbar andocken (korrekter Theia-Hook).
-  async initializeLayout() {
-    await this.openView({ activate: true, reveal: true });
+  // Robuste Auto-Sichtbarkeit: neue View EINMALIG einblenden — auch wenn Theia ein altes
+  // (die View noch nicht kennendes) Layout wiederherstellt. onDidInitializeLayout laeuft immer;
+  // ein Pro-View-"gesehen"-Marker verhindert Aufzwingen nach dem ersten Mal (Nutzerwahl bleibt).
+  async onDidInitializeLayout() {
+    const key = 'opusDeck.seen.' + AGENT_WIDGET_ID;
+    try { if (localStorage.getItem(key)) return; } catch (e) { /* localStorage evtl. blockiert */ }
+    await this.openView({ activate: false, reveal: true });
+    try { localStorage.setItem(key, '1'); } catch (e) { /* egal */ }
   }
 }
 decorate(injectable(), AgentViewContribution);

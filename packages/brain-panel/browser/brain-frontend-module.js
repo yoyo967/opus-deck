@@ -18,9 +18,13 @@ class BrainViewContribution extends AbstractViewContribution {
       toggleCommandId: 'opusDeck.brain.toggle',
     });
   }
-  // Default-Layout: Brain-View links andocken, ohne den Fokus vom Agenten zu stehlen.
-  async initializeLayout() {
+  // Robuste Auto-Sichtbarkeit: EINMALIG einblenden (auch nach Layout-Restore), danach
+  // Nutzerwahl respektieren. Pro-View-Marker -> kein Race, kein Aufzwingen.
+  async onDidInitializeLayout() {
+    const key = 'opusDeck.seen.' + BRAIN_WIDGET_ID;
+    try { if (localStorage.getItem(key)) return; } catch (e) { /* localStorage evtl. blockiert */ }
     await this.openView({ activate: false, reveal: false });
+    try { localStorage.setItem(key, '1'); } catch (e) { /* egal */ }
   }
 }
 decorate(injectable(), BrainViewContribution);

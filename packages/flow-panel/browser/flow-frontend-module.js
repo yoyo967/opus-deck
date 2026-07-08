@@ -18,8 +18,13 @@ class FlowViewContribution extends AbstractViewContribution {
       toggleCommandId: 'opusDeck.flow.toggle',
     });
   }
-  async initializeLayout() {
+  // Robuste Auto-Sichtbarkeit: EINMALIG einblenden (auch nach Layout-Restore), danach
+  // Nutzerwahl respektieren. Pro-View-Marker -> kein Race, kein Aufzwingen.
+  async onDidInitializeLayout() {
+    const key = 'opusDeck.seen.' + FLOW_WIDGET_ID;
+    try { if (localStorage.getItem(key)) return; } catch (e) { /* localStorage evtl. blockiert */ }
     await this.openView({ activate: false, reveal: false });
+    try { localStorage.setItem(key, '1'); } catch (e) { /* egal */ }
   }
 }
 decorate(injectable(), FlowViewContribution);
