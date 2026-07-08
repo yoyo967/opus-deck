@@ -24,6 +24,12 @@ Ein **weltklasse, VS-Code-gebrandetes Interface**, das
    EX** und soll **genauso stark wie OPUS PRIME EX** werden — voller hybrider Modell-Katalog (alle
    Claude + Gemini/Vertex-EU + Gemma 4 lokal **und Cloud-GPU**), Gateway-Muster wiederverwendet.
    Spec: `spec/FLOW_STUDIO.md`, Status: `opus-flow/docs/STATUS.md`.
+4. **weitere Clients + ACP-Öffnung.** Ein **Android-Client** („Agent Control Surface": Missions ·
+   Approvals · Artifacts · Audit — kein Voll-IDE) ist als 4. Zugang geplant. **ACP-Bau-Reihenfolge
+   (Fundament vor Domäne):** PRIME-EX-ACP-Adapter → OPUS FLOW als ACP-Agent → Fremd-Agent (Claude
+   Code/Gemini CLI) zum Beweis der Offenheit → erst danach nächster Fach-Agent (z. B. OPUS MONEY EX,
+   **nur als Info-/Analyse-Agent**, kein Broker/Verwahrer — Lizenzrecht). Voll-Briefing (Mobile,
+   Marke, ACP, Regulatorik): [`docs/strategy/ECOSYSTEM_BRIEFING.md`](strategy/ECOSYSTEM_BRIEFING.md).
 3. **den vollen Funktionsumfang** liefert, den Nutzer:innen von Claude.ai und Google
    Antigravity kennen — Projekte anlegen, Dateien hochladen/erstellen/bearbeiten/
    herunterladen, Artefakte, Multi-Agent-Orchestrierung („Mission Control"), Terminal,
