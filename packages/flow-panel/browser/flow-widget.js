@@ -31,6 +31,8 @@ class FlowWidget extends ReactWidget {
     this._tab = 'run';
     this._tools = [];
     this._selected = '';
+    this._models = [];
+    this._modelDefault = '';
     this._ergebnis = null;
     this._plan = null;
     this._dry = null;
@@ -61,6 +63,11 @@ class FlowWidget extends ReactWidget {
       this._selected = (this._tools[0] && this._tools[0].name) || '';
       this._scope = d.scope || [];
       this._status = '';
+      try {
+        const m = await this._get('/api/flow/models');
+        this._models = m.modelle || [];
+        this._modelDefault = m.default || '';
+      } catch (e) { /* Katalog optional */ }
     } catch (e) {
       this._status = 'OPUS-FLOW-Daemon nicht erreichbar (' + FLOW + '). Lokal starten: opus-flow-serve';
     }
@@ -95,9 +102,13 @@ class FlowWidget extends ReactWidget {
   async plan() {
     const befehl = (this.node.querySelector('.flow-befehl') || {}).value || '';
     if (!befehl.trim()) return;
-    this._busy = true; this._status = 'Plane (lokales Gemma, kann dauern) …'; this._plan = null; this.update();
+    const sel = this.node.querySelector('.flow-model');
+    const modelId = (sel && sel.value) || this._modelDefault;
+    const label = (this._models.find((m) => m.id === modelId) || {}).label || modelId || 'Default';
+    this._busy = true; this._status = 'Plane mit ' + label + ' … (lokale CPU-Modelle koennen dauern)';
+    this._plan = null; this._dry = null; this.update();
     try {
-      const d = await this._post('/api/flow/plan', { befehl: befehl });
+      const d = await this._post('/api/flow/plan', { befehl: befehl, model_id: modelId });
       this._plan = d;
       this._dry = null;
       this._status = d.fehler ? d.fehler : '';
@@ -182,7 +193,9 @@ class FlowWidget extends ReactWidget {
   renderPlan() {
     const p = this._plan;
     return h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px' } }, [
-      h('div', { key: 'n', style: hint() }, 'Natuerlichsprachlicher Befehl → Schrittplan (nur PLAN, keine Ausfuehrung). Braucht lokales Gemma (Ollama).'),
+      h('div', { key: 'n', style: hint() }, 'Natuerlichsprachlicher Befehl → Schrittplan (nur PLAN, keine Ausfuehrung).'),
+      this._models.length ? h('select', { key: 'm', className: 'flow-model', defaultValue: this._modelDefault, style: inputStyle() },
+        this._models.map((m) => h('option', { key: m.id, value: m.id }, m.label + '  ·  ' + m.provider))) : null,
       h('textarea', { key: 'in', className: 'flow-befehl', rows: 3, placeholder: 'z. B. „zeig mir den git-Status dieses Repos"', style: Object.assign({}, inputStyle(), { resize: 'vertical' }) }),
       h('div', { key: 'btns', style: { display: 'flex', gap: '6px' } }, [
         h('button', { key: 'b', disabled: this._busy, onClick: () => this.plan(), style: btn(this._busy) }, this._busy ? '…' : 'Plan erstellen'),
