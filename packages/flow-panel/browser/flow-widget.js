@@ -33,6 +33,7 @@ class FlowWidget extends ReactWidget {
     this._selected = '';
     this._ergebnis = null;
     this._plan = null;
+    this._dry = null;
     this._pending = [];
     this._audit = [];
     this._status = '';
@@ -98,7 +99,30 @@ class FlowWidget extends ReactWidget {
     try {
       const d = await this._post('/api/flow/plan', { befehl: befehl });
       this._plan = d;
+      this._dry = null;
       this._status = d.fehler ? d.fehler : '';
+    } catch (e) { this._status = 'Daemon nicht erreichbar.'; }
+    this._busy = false; this.update();
+  }
+
+  async dryRun() {
+    if (!this._plan || !this._plan.plan) return;
+    this._busy = true; this._status = 'Dry-Run (validiere, ohne Ausfuehrung) …'; this.update();
+    try {
+      const d = await this._post('/api/flow/dry_run', { plan: this._plan.plan });
+      this._dry = d.dry_run || [];
+      this._status = '';
+    } catch (e) { this._status = 'Daemon nicht erreichbar.'; }
+    this._busy = false; this.update();
+  }
+
+  async runStep(step) {
+    // Einzelnen Plan-Schritt ausfuehren: read sofort, exec/write/ui -> Freigaben (Gate).
+    this._busy = true; this._status = 'Fuehre ' + step.tool + ' …'; this._ergebnis = null; this.update();
+    try {
+      const d = await this._post('/api/flow/run', { tool: step.tool, args: step.args || {} });
+      if (d.pending) { this._status = '→ Freigabe noetig. Tab „Freigaben".'; await this.loadPending(); this._tab = 'gate'; }
+      else { this._ergebnis = d.ergebnis || d; this._status = 'Schritt ausgefuehrt.'; }
     } catch (e) { this._status = 'Daemon nicht erreichbar.'; }
     this._busy = false; this.update();
   }
@@ -160,15 +184,27 @@ class FlowWidget extends ReactWidget {
     return h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px' } }, [
       h('div', { key: 'n', style: hint() }, 'Natuerlichsprachlicher Befehl → Schrittplan (nur PLAN, keine Ausfuehrung). Braucht lokales Gemma (Ollama).'),
       h('textarea', { key: 'in', className: 'flow-befehl', rows: 3, placeholder: 'z. B. „zeig mir den git-Status dieses Repos"', style: Object.assign({}, inputStyle(), { resize: 'vertical' }) }),
-      h('button', { key: 'b', disabled: this._busy, onClick: () => this.plan(), style: Object.assign({}, btn(this._busy), { alignSelf: 'flex-start' }) }, this._busy ? '…' : 'Plan erstellen'),
+      h('div', { key: 'btns', style: { display: 'flex', gap: '6px' } }, [
+        h('button', { key: 'b', disabled: this._busy, onClick: () => this.plan(), style: btn(this._busy) }, this._busy ? '…' : 'Plan erstellen'),
+        p && p.plan ? h('button', { key: 'd', disabled: this._busy, onClick: () => this.dryRun(),
+          style: { padding: '7px 12px', borderRadius: '6px', border: '1px solid ' + GOLD, background: 'transparent', color: GOLD, cursor: 'pointer', fontWeight: 600 } }, 'Dry-Run') : null,
+      ]),
       p && p.plan ? h('div', { key: 'pl', style: { display: 'flex', flexDirection: 'column', gap: '6px' } },
-        p.plan.map((s, i) => h('div', { key: i, style: karte() }, [
-          h('div', { key: 't', style: { display: 'flex', gap: '6px', alignItems: 'center' } }, [
-            h('span', { style: { fontSize: '10px', opacity: 0.5 } }, (i + 1) + '.'),
-            h('strong', { style: { fontSize: '12px' } }, s.tool)]),
-          h('div', { key: 'a', style: { fontSize: '10px', opacity: 0.7, fontFamily: 'monospace' } }, JSON.stringify(s.args || {})),
-          s.warum ? h('div', { key: 'w', style: hint() }, s.warum) : null,
-        ]))) : null,
+        p.plan.map((s, i) => {
+          const dv = this._dry && this._dry[i];
+          return h('div', { key: i, style: karte() }, [
+            h('div', { key: 't', style: { display: 'flex', gap: '6px', alignItems: 'center' } }, [
+              h('span', { style: { fontSize: '10px', opacity: 0.5 } }, (i + 1) + '.'),
+              h('strong', { style: { fontSize: '12px' } }, s.tool),
+              h('button', { key: 'r', disabled: this._busy, onClick: () => this.runStep(s),
+                style: { marginLeft: 'auto', padding: '3px 9px', borderRadius: '5px', border: 'none', background: GOLD, color: INK, fontWeight: 600, cursor: 'pointer', fontSize: '10px' } }, '▶ Ausfuehren')]),
+            h('div', { key: 'a', style: { fontSize: '10px', opacity: 0.7, fontFamily: 'monospace' } }, JSON.stringify(s.args || {})),
+            s.warum ? h('div', { key: 'w', style: hint() }, s.warum) : null,
+            dv ? h('div', { key: 'dv', style: { fontSize: '10px', marginTop: '3px', color: dv.ok ? '#6cc07a' : '#dc7070' } },
+              (dv.ok ? '✓ Dry-Run: ' : '✗ Dry-Run: ') + (dv.hinweis || '')) : null,
+          ]);
+        })) : null,
+      this.renderErgebnis(),
     ]);
   }
 
