@@ -114,14 +114,22 @@ Nicht verhandelbar, ab Tag 1:
   ```
   Wiederholung eines gespeicherten Workflows durchläuft dieselben Gates (Scope bleibt bindend).
 
-## 7. Modell-Strategie (hybrid)
+## 7. Modell-Strategie (hybrid) → **OPUS FLOW EX**
 
-Nutzt das in OPUS PRIME EX gebaute Muster (Modell-Katalog, `build_llm_client`):
-- **Gemma 4 lokal (Default):** Function-Calling für Planung + einfache Schritte. Keine Kosten,
-  kein Datenabfluss. Start CPU/32 GB (E4B), größere Varianten via GCP-GPU später.
-- **Claude (optional):** für schwere/lange Pläne, wenn Gemma unzuverlässig ist — umschaltbar.
-- **Messen statt annehmen:** Function-Calling-Zuverlässigkeit von Gemma 4 gegen einen
-  Flow-Eval-Satz prüfen (Plan-Korrektheit, Tool-Arg-Genauigkeit), bevor autonome Ketten erlaubt werden.
+**Beschluss (Yahya, 2026-07-08): OPUS FLOW soll genauso stark wie OPUS PRIME EX werden → OPUS FLOW
+EX.** Dafür bekommt es den **vollen hybriden Modell-Katalog von OPUS PRIME EX** (nicht nur lokales
+Gemma): **alle Claude-Modelle**, **Gemini/Vertex-EU**, **Gemma 4 lokal** UND **Gemma 4 via
+Cloud-GPU**. Muster wiederverwenden statt neu bauen — das OPUS-PRIME-EX-Gateway (`config/models.yaml`,
+`ModelProfile`, `build_llm_client`, Provider-Abstraktion) nach opus-flow portieren; Modellwahl im
+Flow-Panel (analog Agent-Panel). Technische IDs (Repo/Package/MCP) behalten den alten Slug.
+
+- **Gemma 4 (lokal + Cloud-GPU):** Function-Calling für Planung. Lokal = keine Kosten/kein Abfluss;
+  Cloud-GPU für Tempo/größere Varianten.
+- **Claude / Gemini:** für schwere/lange Pläne bzw. EU-first — umschaltbar aus dem Katalog.
+- **Messen statt annehmen:** Function-Calling-Zuverlässigkeit gegen einen **Flow-Eval**-Satz prüfen
+  (Plan-Korrektheit, Tool-Arg-Genauigkeit), bevor autonome Ketten erlaubt werden.
+
+> Status/Vision-Detail + Nächste Schritte: `opus-flow/docs/STATUS.md`.
 
 ## 8. Meilensteinplan (gekoppelt an OPUS DECK)
 

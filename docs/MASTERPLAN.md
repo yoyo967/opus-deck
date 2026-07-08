@@ -18,7 +18,12 @@ Ein **weltklasse, VS-Code-gebrandetes Interface**, das
    deterministische Pipeline (Routing, Retrieval, Guardrails), Quellen, Artefakte.
 2. **generisch ein Zuhause für beliebige Agenten** wird — über den offenen **Agent Client
    Protocol (ACP)** kann jeder ACP-fähige Agent (Claude Code, Gemini CLI, Codex, eigene)
-   angedockt werden. OPUS PRIME EX ist der erste, nicht der einzige Mieter.
+   angedockt werden. OPUS PRIME EX ist der erste, nicht der einzige Mieter. **OPUS FLOW EX**
+   (lokaler OS-/Dev-Automations-Agent, Repo `opus-flow`) ist der zweite reale Mieter — F0/F1/F2
+   gebaut + im UI integriert (Flow-Panel). **Beschluss 2026-07-08:** OPUS FLOW wird zu **OPUS FLOW
+   EX** und soll **genauso stark wie OPUS PRIME EX** werden — voller hybrider Modell-Katalog (alle
+   Claude + Gemini/Vertex-EU + Gemma 4 lokal **und Cloud-GPU**), Gateway-Muster wiederverwendet.
+   Spec: `spec/FLOW_STUDIO.md`, Status: `opus-flow/docs/STATUS.md`.
 3. **den vollen Funktionsumfang** liefert, den Nutzer:innen von Claude.ai und Google
    Antigravity kennen — Projekte anlegen, Dateien hochladen/erstellen/bearbeiten/
    herunterladen, Artefakte, Multi-Agent-Orchestrierung („Mission Control"), Terminal,
