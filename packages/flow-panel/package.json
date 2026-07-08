@@ -1,0 +1,15 @@
+{
+  "name": "@opus-deck/flow-panel",
+  "version": "0.0.1",
+  "description": "OPUS DECK — OPUS FLOW panel: run tools (read auto / exec gated), plan, approvals, audit",
+  "license": "MIT",
+  "main": "browser/flow-frontend-module.js",
+  "dependencies": {
+    "@theia/core": "1.72.3"
+  },
+  "theiaExtensions": [
+    {
+      "frontend": "browser/flow-frontend-module"
+    }
+  ]
+}

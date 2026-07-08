@@ -8,6 +8,7 @@
     "@opus-deck/agent-panel": "0.0.1",
     "@opus-deck/api-proxy": "0.0.1",
     "@opus-deck/brain-panel": "0.0.1",
+    "@opus-deck/flow-panel": "0.0.1",
     "@opus-deck/ui-kit": "0.0.1",
     "@theia/core": "1.72.3",
     "@theia/editor": "1.72.3",

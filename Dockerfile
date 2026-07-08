@@ -14,6 +14,7 @@ COPY packages/ui-kit/package.json packages/ui-kit/
 COPY packages/agent-panel/package.json packages/agent-panel/
 COPY packages/brain-panel/package.json packages/brain-panel/
 COPY packages/api-proxy/package.json packages/api-proxy/
+COPY packages/flow-panel/package.json packages/flow-panel/
 COPY apps/workbench/package.json apps/workbench/
 RUN npm install --no-audit --no-fund
 
