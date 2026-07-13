@@ -150,10 +150,17 @@ Jede Flow-Phase härtet zugleich eine OPUS-DECK-Surface (Co-Development).
   gegen Scope + Allowlist/Denylist **ohne Nebeneffekt** (zeigt ✓/✗ + Grund vor jeder Wirkung);
   **schrittweise gegatete Ausführung** aus dem Plan (read sofort, exec → Gate). *AK erfüllt:*
   mehrstufiger Plan sichtbar, einzelne Freigabe, Dry-Run zeigt Wirkung vorab — **im Cloud-UI
-  verifiziert**. Offen (Feinschliff): automatische Ketten-Ausführung mit Re-Plan; Gemma-4-
-  Function-Calling-Zuverlässigkeit gegen einen Flow-Eval messen (§7/§9).
-- **F3 — Artifacts/Replay/Workflow-Speicherung 🟡 teilweise:** Audit-Log (append-only) steht +
-  ist im Panel sichtbar. Offen: Replay + parametrisierte Workflow-Speicherung (JSON/YAML).
+  verifiziert**.
+- **F2-Feinschliff — Ketten-Ausführung + Flow-Eval ✅ (2026-07-09):** `daemon.run_plan`
+  (`/api/flow/run_plan`, Panel-Button **▶ Kette ausführen**) läuft den Plan als Kette — read auto,
+  der **erste** exec/write/ui-Schritt pausiert + geht ins Gate (kein autonomes Durchlaufen). **Flow-
+  Eval** (`src/flow/eval.py`, CLI `apps.eval.run`, Satz `config/flow_eval.json`) misst Plan-Qualität
+  deterministisch (geparst/tools_gültig/scope_ok/erwartet) — live: Gemma → gültiger git.status-Plan.
+  **Offen (F5):** *automatisches* Re-Plan bei Abweichung (aktuell Mensch setzt Kette per `rest` fort).
+- **F3 — Replay + parametrisierte Workflow-Speicherung ✅ (2026-07-08):** `WorkflowStore` speichert
+  bestätigte Flüsse als JSON (`{name,params,schritte}`); `${param}`-Ersetzung; `daemon.run_workflow`
+  spielt GEGATET ab. HTTP `/api/flow/workflows|workflow/save|run`; Panel-Tab **Workflows**. Audit-Log
+  (append-only) steht + ist im Panel sichtbar.
 - **OPUS-DECK-Panel ✅:** `@opus-deck/flow-panel` (Ausführen/Plan/Freigaben/Audit) — das Gate ist
   in der UI (PENDING → Freigeben/Ablehnen). Verdrahtet + im Browser end-to-end verifiziert.
 - **F4 — GUI-Automation** (Accessibility/DOM; Electron/Web zuerst). *AK:* Klick+Fill in einer
