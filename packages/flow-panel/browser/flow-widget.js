@@ -36,6 +36,7 @@ class FlowWidget extends ReactWidget {
     this._ergebnis = null;
     this._plan = null;
     this._dry = null;
+    this._chain = null;
     this._pending = [];
     this._audit = [];
     this._workflows = [];
@@ -124,6 +125,26 @@ class FlowWidget extends ReactWidget {
       const d = await this._post('/api/flow/dry_run', { plan: this._plan.plan });
       this._dry = d.dry_run || [];
       this._status = '';
+    } catch (e) { this._status = 'Daemon nicht erreichbar.'; }
+    this._busy = false; this.update();
+  }
+
+  async runChain() {
+    // Ganzen Plan als Kette: read-Schritte laufen auto, erster exec/write/ui pausiert (Gate).
+    if (!this._plan || !this._plan.plan) return;
+    this._busy = true; this._status = 'Kette laeuft (read auto · erster exec/write/ui pausiert) …';
+    this._chain = null; this._ergebnis = null; this.update();
+    try {
+      const d = await this._post('/api/flow/run_plan', { plan: this._plan.plan });
+      this._chain = d;
+      if (d.status === 'warte_freigabe') {
+        this._status = 'Kette pausiert bei Schritt ' + (d.index + 1) + ' — Freigabe im Tab „Freigaben".';
+        await this.loadPending();
+      } else if (d.status === 'fehler') {
+        this._status = 'Kette gestoppt bei Schritt ' + (d.index + 1) + ' (unbekanntes Tool).';
+      } else {
+        this._status = 'Kette fertig — ' + (d.ergebnisse || []).length + ' read-Schritt(e) gelaufen.';
+      }
     } catch (e) { this._status = 'Daemon nicht erreichbar.'; }
     this._busy = false; this.update();
   }
@@ -247,7 +268,16 @@ class FlowWidget extends ReactWidget {
         h('button', { key: 'b', disabled: this._busy, onClick: () => this.plan(), style: btn(this._busy) }, this._busy ? '…' : 'Plan erstellen'),
         p && p.plan ? h('button', { key: 'd', disabled: this._busy, onClick: () => this.dryRun(),
           style: { padding: '7px 12px', borderRadius: '6px', border: '1px solid ' + GOLD, background: 'transparent', color: GOLD, cursor: 'pointer', fontWeight: 600 } }, 'Dry-Run') : null,
+        p && p.plan ? h('button', { key: 'c', disabled: this._busy, onClick: () => this.runChain(),
+          style: { padding: '7px 12px', borderRadius: '6px', border: 'none', background: GOLD, color: INK, cursor: 'pointer', fontWeight: 600 } }, '▶ Kette ausfuehren') : null,
       ]),
+      this._chain ? h('div', { key: 'ch', style: Object.assign({}, karte(), { borderColor: this._chain.status === 'fertig' ? 'rgba(108,192,122,0.6)' : GOLD }) }, [
+        h('div', { key: 't', style: { fontSize: '11px', fontWeight: 600 } },
+          this._chain.status === 'fertig' ? '✓ Kette fertig — ' + (this._chain.ergebnisse || []).length + ' read-Schritt(e)'
+          : this._chain.status === 'warte_freigabe' ? '⏸ Pausiert bei Schritt ' + (this._chain.index + 1) + ' (Freigabe noetig) · ' + ((this._chain.rest || []).length) + ' offen'
+          : '✗ Gestoppt bei Schritt ' + (this._chain.index + 1)),
+        h('div', { key: 'h', style: hint() }, 'read-Schritte liefen automatisch; der erste exec/write/ui-Schritt wartet im Tab „Freigaben".'),
+      ]) : null,
       p && p.plan ? h('div', { key: 'save', style: { display: 'flex', gap: '6px', alignItems: 'center' } }, [
         h('input', { key: 'nm', className: 'flow-wf-name', placeholder: 'Als Workflow speichern (Name)…', style: Object.assign({}, inputStyle(), { flex: 1 }) }),
         h('button', { key: 'sv', disabled: this._busy, onClick: () => this.saveWorkflow(),
