@@ -40,10 +40,13 @@ class FlowWidget extends ReactWidget {
     this._pending = [];
     this._audit = [];
     this._workflows = [];
+    this._security = null;
+    this._gestoppt = false;
     this._status = '';
     this._busy = false;
     this.update();
     this.loadTools();
+    this.loadSecurity();
   }
 
   async _get(pfad) {
@@ -163,6 +166,34 @@ class FlowWidget extends ReactWidget {
   async loadPending() { try { this._pending = (await this._get('/api/flow/pending')).pending || []; } catch (e) { /* still */ } }
   async loadAudit() { try { this._audit = (await this._get('/api/flow/audit')).eintraege || []; } catch (e) { /* still */ } }
   async loadWorkflows() { try { this._workflows = (await this._get('/api/flow/workflows')).workflows || []; } catch (e) { /* still */ } }
+  async loadSecurity() {
+    try {
+      this._security = await this._get('/api/flow/security');
+      this._gestoppt = !!(this._security.kill_switch && this._security.kill_switch.gestoppt);
+    } catch (e) { this._security = null; }
+  }
+
+  async killSwitch() {
+    this._busy = true; this._status = 'Kill-Switch: stoppe + verwerfe offene Freigaben …'; this.update();
+    try {
+      const d = await this._post('/api/flow/kill', {});
+      this._gestoppt = !!d.gestoppt;
+      this._status = '⛔ Kill-Switch AKTIV — Ausfuehrung gesperrt (' + (d.verworfen || 0) + ' Freigabe(n) verworfen). „Entsperren" zum Fortsetzen.';
+      await this.loadPending(); await this.loadSecurity();
+    } catch (e) { this._status = 'Daemon nicht erreichbar.'; }
+    this._busy = false; this.update();
+  }
+
+  async armSwitch() {
+    this._busy = true; this._status = 'Entsperren …'; this.update();
+    try {
+      const d = await this._post('/api/flow/arm', {});
+      this._gestoppt = !!d.gestoppt;
+      this._status = this._gestoppt ? 'Noch gesperrt.' : 'Entsperrt — Ausfuehrung wieder erlaubt.';
+      await this.loadSecurity();
+    } catch (e) { this._status = 'Daemon nicht erreichbar.'; }
+    this._busy = false; this.update();
+  }
 
   // ${param}-Platzhalter aus allen String-Args der Plan-Schritte sammeln.
   _paramsAusPlan(schritte) {
@@ -223,6 +254,7 @@ class FlowWidget extends ReactWidget {
     if (t === 'gate') this.loadPending();
     if (t === 'audit') this.loadAudit();
     if (t === 'flows') this.loadWorkflows();
+    if (t === 'security') this.loadSecurity();
     this.update();
   }
 
@@ -348,10 +380,30 @@ class FlowWidget extends ReactWidget {
     ]);
   }
 
+  renderSecurity() {
+    const s = this._security;
+    const zeile = (k, v) => h('div', { key: k, style: { display: 'flex', gap: '8px', fontSize: '11px', padding: '3px 0' } }, [
+      h('span', { style: { opacity: 0.6, minWidth: '120px' } }, k), h('span', { style: { fontFamily: 'monospace' } }, v)]);
+    return h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px' } }, [
+      h('div', { key: 'n', style: hint() }, 'Aktive Sicherheitslage (read-only). Scope + Gate + Listen sind der Kontrakt; nur Menschen ändern sie.'),
+      s ? h('div', { key: 'b', style: { display: 'flex', flexDirection: 'column', gap: '4px' } }, [
+        zeile('Kill-Switch', this._gestoppt ? '⛔ AKTIV (gesperrt)' : '✓ scharf (Ausfuehrung erlaubt)'),
+        zeile('Datei-Scope', (s.datei_scope || []).join(', ')),
+        zeile('Gate', 'read=auto · exec/write/ui=Freigabe'),
+        zeile('Shell-Allowlist', (s.shell ? s.shell.allowlist_n : '?') + ' Kommandos'),
+        zeile('Shell-Denylist', (s.shell ? s.shell.denylist_n : '?') + ' Muster'),
+        zeile('GUI-Treiber', s.gui && s.gui.treiber_aktiv ? 'aktiv' : 'deaktiviert'),
+        zeile('App-Scope', s.gui && s.gui.app_scope && s.gui.app_scope.length ? s.gui.app_scope.join(', ') : '(leer = deny-all)'),
+        zeile('Tools', (s.tools || []).map((t) => t.name + '·' + t.wirkungsklasse).join('  ')),
+      ]) : h('div', { key: 'e', style: hint() }, 'Keine Daten (Daemon nicht erreichbar).'),
+    ]);
+  }
+
   render() {
-    const tabs = [['run', 'Ausfuehren'], ['plan', 'Plan'], ['flows', 'Workflows'], ['gate', 'Freigaben'], ['audit', 'Audit']];
+    const tabs = [['run', 'Ausfuehren'], ['plan', 'Plan'], ['flows', 'Workflows'], ['gate', 'Freigaben'], ['audit', 'Audit'], ['security', 'Sicherheit']];
     const body = this._tab === 'run' ? this.renderRun() : this._tab === 'plan' ? this.renderPlan()
       : this._tab === 'flows' ? this.renderWorkflows()
+      : this._tab === 'security' ? this.renderSecurity()
       : this._tab === 'gate' ? this.renderGate() : this.renderAudit();
     return h('div', { style: { fontFamily: 'var(--theia-ui-font-family)', color: 'var(--theia-foreground)', fontSize: '12px', padding: '12px', display: 'flex', flexDirection: 'column', height: '100%', boxSizing: 'border-box' } }, [
       h('div', { key: 'hd', style: { display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--theia-panel-border)', paddingBottom: '8px', marginBottom: '10px' } }, [
@@ -359,8 +411,15 @@ class FlowWidget extends ReactWidget {
         h('strong', { key: 'n', style: { fontSize: '13px' } }, 'OPUS FLOW'),
         h('span', { key: 't', style: { fontSize: '11px', opacity: 0.7 } }, 'lokal · Plan → Gate → Audit'),
         h('span', { key: 'p', style: { marginLeft: 'auto', fontSize: '10px', opacity: 0.6 } }, this._pending.length ? (this._pending.length + ' offen') : ''),
+        this._gestoppt
+          ? h('button', { key: 'arm', disabled: this._busy, onClick: () => this.armSwitch(), title: 'Entsperren',
+              style: { padding: '5px 10px', borderRadius: '6px', border: '1px solid ' + GOLD, background: 'transparent', color: GOLD, cursor: 'pointer', fontWeight: 700, fontSize: '11px' } }, 'Entsperren')
+          : h('button', { key: 'kill', disabled: this._busy, onClick: () => this.killSwitch(), title: 'Kill-Switch: alles stoppen',
+              style: { padding: '5px 10px', borderRadius: '6px', border: 'none', background: '#c0392b', color: '#fff', cursor: 'pointer', fontWeight: 700, fontSize: '11px' } }, '⛔ Stop'),
       ]),
-      h('div', { key: 'tabs', style: { display: 'flex', gap: '4px', marginBottom: '10px' } }, tabs.map(([id, label]) =>
+      this._gestoppt ? h('div', { key: 'ks', style: { background: 'rgba(192,57,43,0.16)', border: '1px solid rgba(192,57,43,0.6)', color: '#e07a6e', borderRadius: '8px', padding: '7px 10px', marginBottom: '10px', fontSize: '11px', fontWeight: 600 } },
+        '⛔ Kill-Switch AKTIV — jede Ausfuehrung ist gesperrt. „Entsperren" (oben) setzt fort.') : null,
+      h('div', { key: 'tabs', style: { display: 'flex', gap: '4px', marginBottom: '10px', flexWrap: 'wrap' } }, tabs.map(([id, label]) =>
         h('button', { key: id, onClick: () => this.setTab(id), style: { flex: 1, padding: '6px', fontSize: '11px', borderRadius: '6px', cursor: 'pointer',
           border: '1px solid ' + (this._tab === id ? GOLD : 'var(--theia-panel-border)'),
           background: this._tab === id ? 'rgba(201,162,39,0.14)' : 'transparent',
