@@ -163,8 +163,12 @@ Jede Flow-Phase härtet zugleich eine OPUS-DECK-Surface (Co-Development).
   (append-only) steht + ist im Panel sichtbar.
 - **OPUS-DECK-Panel ✅:** `@opus-deck/flow-panel` (Ausführen/Plan/Freigaben/Audit) — das Gate ist
   in der UI (PENDING → Freigeben/Ablehnen). Verdrahtet + im Browser end-to-end verifiziert.
-- **F4 — GUI-Automation** (Accessibility/DOM; Electron/Web zuerst). *AK:* Klick+Fill in einer
-  Ziel-App verifiziert; Screenshot je Schritt.
+- **F4 — GUI-Automation ✅ Framework (2026-07-09):** Accessibility-first (`src/flow/gui.py`):
+  `AppScope`-Allowlist (Default deny-all, §5.1), `ui.inspect` (`read`) · `ui.click`/`ui.fill`
+  (`ui`, gegated), Ausgaben redigiert, `ui.fill` verschweigt den Wert, **Screenshot je Schritt**.
+  Echter UIA-Treiber (`gui_windows.py`, Extra `[gui]`) importsicher gekapselt. Gates grün
+  (mypy 21/pytest 54, Fake-Treiber-E2E); `ui.*` im Panel gelistet + gegatet. *AK offen (opt-in):*
+  Live-Klick+Fill an echter nativer Ziel-App (braucht `.[gui]` + Ziel-App + `FLOW_APPS`).
 - **F5 — Hybrid-Modell, Parametrisierung, Härtung** (Scope-Editor, Denylist-Pflege, Undo,
   Kill-Switch, Flow-Eval). *AK:* Gemma↔Claude umschaltbar; Security-Review bestanden.
 
