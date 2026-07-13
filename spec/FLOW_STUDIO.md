@@ -169,8 +169,11 @@ Jede Flow-Phase härtet zugleich eine OPUS-DECK-Surface (Co-Development).
   Echter UIA-Treiber (`gui_windows.py`, Extra `[gui]`) importsicher gekapselt. Gates grün
   (mypy 21/pytest 54, Fake-Treiber-E2E); `ui.*` im Panel gelistet + gegatet. **AK erfüllt:** echter
   UIA-Treiber gegen Windows-11-Notepad live verifiziert (inspect + `ui.fill` + Screenshot-Artifact).
-- **F5 — Hybrid-Modell, Parametrisierung, Härtung** (Scope-Editor, Denylist-Pflege, Undo,
-  Kill-Switch, Flow-Eval). *AK:* Gemma↔Claude umschaltbar; Security-Review bestanden.
+- **F5 — Härtung 🟢 Kern (2026-07-09):** **Kill-Switch** (`daemon.kill()`/`arm()`, `/api/flow/kill`|
+  `arm`) verwirft offene Freigaben + sperrt jede Ausführung bis ein Mensch entsperrt (Panel: ⛔ Stop +
+  Banner). **Security-Posture** (`/api/flow/security`, read-only, Panel-Tab „Sicherheit"): Scope, Gate,
+  Allow/Denylist, GUI-Treiber, Tool-Klassen. *AK Gemma↔Claude umschaltbar:* via Provider-Katalog
+  erfüllt. Offen (F5-Rest): Undo, Pixel-Fallback, auto Re-Plan, runtime Scope-Editor (menschlich).
 
 ## 9. Risiken (ehrlich)
 
