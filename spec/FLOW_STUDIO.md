@@ -167,8 +167,8 @@ Jede Flow-Phase härtet zugleich eine OPUS-DECK-Surface (Co-Development).
   `AppScope`-Allowlist (Default deny-all, §5.1), `ui.inspect` (`read`) · `ui.click`/`ui.fill`
   (`ui`, gegated), Ausgaben redigiert, `ui.fill` verschweigt den Wert, **Screenshot je Schritt**.
   Echter UIA-Treiber (`gui_windows.py`, Extra `[gui]`) importsicher gekapselt. Gates grün
-  (mypy 21/pytest 54, Fake-Treiber-E2E); `ui.*` im Panel gelistet + gegatet. *AK offen (opt-in):*
-  Live-Klick+Fill an echter nativer Ziel-App (braucht `.[gui]` + Ziel-App + `FLOW_APPS`).
+  (mypy 21/pytest 54, Fake-Treiber-E2E); `ui.*` im Panel gelistet + gegatet. **AK erfüllt:** echter
+  UIA-Treiber gegen Windows-11-Notepad live verifiziert (inspect + `ui.fill` + Screenshot-Artifact).
 - **F5 — Hybrid-Modell, Parametrisierung, Härtung** (Scope-Editor, Denylist-Pflege, Undo,
   Kill-Switch, Flow-Eval). *AK:* Gemma↔Claude umschaltbar; Security-Review bestanden.
 
